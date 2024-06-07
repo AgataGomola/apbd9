@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using tutorial_9.Data;
+using tutorial_9.Models;
 
 namespace tutorial_9.Controllers;
 
@@ -46,5 +47,26 @@ public class TripsController : ControllerBase
         };
         return Ok(result);
     }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteClient(int id)
+    {
+        var client = await _context.Clients.FindAsync(id);
+
+        if (client == null)
+        {
+            NotFound("Client does not exist");
+        }
+        var hasTrips = await _context.ClientTrips.AnyAsync(cl => cl.IdClient == id);
+        if (hasTrips)
+        {
+            return BadRequest("Client with assigned trips cannot be deleted");
+        }
+
+        _context.Clients.Remove(client);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+    
     
 }
