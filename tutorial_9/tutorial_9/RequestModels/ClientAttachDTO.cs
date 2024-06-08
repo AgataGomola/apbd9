@@ -1,6 +1,6 @@
-namespace tutorial_9.Models;
+namespace tutorial_9.RequestModels;
 
-public class ClientAttach
+public class ClientAttachDTO
 {
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;

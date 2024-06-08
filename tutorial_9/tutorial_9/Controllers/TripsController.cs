@@ -2,6 +2,7 @@ using System.Runtime.InteropServices.JavaScript;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using tutorial_9.Data;
+using tutorial_9.RequestModels;
 using tutorial_9.Models;
 
 namespace tutorial_9.Controllers;
@@ -70,7 +71,7 @@ public class TripsController : ControllerBase
     }
 
     [HttpPost("{idTrip:int}/clients")]
-    public async Task<IActionResult> attachClient(int idTrip, [FromBody] ClientAttach cl)
+    public async Task<IActionResult> attachClient(int idTrip, [FromBody] ClientAttachDTO cl)
     {
         var trip = await _context.Trips.FindAsync(idTrip);
         if (trip == null)
