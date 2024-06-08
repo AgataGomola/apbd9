@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using tutorial_9.Data;
 using tutorial_9.RequestModels;
 using tutorial_9.Models;
+using tutorial_9.Services;
 
 namespace tutorial_9.Controllers;
 
@@ -12,41 +13,17 @@ namespace tutorial_9.Controllers;
 public class TripsController : ControllerBase
 {
     private readonly Apbd2Context _context;
+    private readonly ITripService _tripService;
 
-    public TripsController(Apbd2Context context)
+    public TripsController(Apbd2Context context, ITripService tripService)
     {
+        _tripService = tripService;
         _context = context;
     }
     [HttpGet]
-    public async Task<IActionResult> GetTrips(int pageNum = 1, int pageSize = 10)
+    public async Task<IActionResult> GetTrips(CancellationToken cancellationToken,int pageNum = 1, int pageSize = 10)
     {
-        var totalTrips = await _context.Trips.CountAsync();
-        var totalPages = (int)Math.Ceiling(totalTrips / (double)pageSize);
-
-        var trips = await _context.Trips.Select(e=> new
-        {
-            Name = e.Name, 
-            Description = e.Description,
-            DateFrom = e.DateFrom,
-            DateTo = e.DateTo,
-            MaxPeople = e.MaxPeople,
-            Countries = e.IdCountries.Select(c=> new
-            {
-                Name = c.Name 
-            }),
-            Clients = e.ClientTrips.Select(cl => new
-            {
-                Name = cl.IdClientNavigation.FirstName,
-                SecondName = cl.IdClientNavigation.LastName
-            })
-        }).ToListAsync();
-        var result = new
-        {
-            PageNum = pageNum,
-            PageSize = pageSize,
-            AllPages = totalPages,
-            Trips = trips
-        };
+        var result = await _tripService.GetTrips(cancellationToken, pageNum, pageSize);
         return Ok(result);
     }
 
