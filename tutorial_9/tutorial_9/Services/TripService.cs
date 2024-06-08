@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using tutorial_9.Models;
 using tutorial_9.Repositories;
 using tutorial_9.ResponseModels;
 using tutorial_9.Services;
@@ -19,4 +20,22 @@ public class TripService: ITripService
         var result = await _repository.GetTrips(cancellationToken,pageNum, pageSize);
         return result;
     }
+
+    public Task<int> DeleteClient(CancellationToken cancellationToken, int id)
+    {
+        return _repository.DeleteClient(cancellationToken, id);
+    }
+
+    public async Task<bool> DoesClientExist(int id)
+    {
+        var client = await _repository.DoesClientExist(id);
+        return client;
+    }
+
+    public async Task<bool> HasTrips(int id)
+    {
+        var hasTrips = await _repository.HasTrips(id);
+        return hasTrips;
+    }
+    
 }

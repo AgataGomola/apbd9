@@ -28,22 +28,26 @@ public class TripsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteClient(int id)
+    public async Task<IActionResult> DeleteClient(CancellationToken cancellationToken, int id)
     {
-        var client = await _context.Clients.FindAsync(id);
-
-        if (client == null)
+        var doesClientExist = await _tripService.DoesClientExist(id);
+        
+        if (!doesClientExist)
         {
             NotFound("Client does not exist");
         }
-        var hasTrips = await _context.ClientTrips.AnyAsync(cl => cl.IdClient == id);
+        
+        var hasTrips = await _tripService.HasTrips(id);
         if (hasTrips)
         {
             return BadRequest("Client with assigned trips cannot be deleted");
         }
 
-        _context.Clients.Remove(client);
-        await _context.SaveChangesAsync();
+        var delete = await _tripService.DeleteClient(cancellationToken, id);
+        if (delete == -1)
+        {
+            return BadRequest("Client could not be deleted");
+        }
         return NoContent();
     }
 

@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using tutorial_9.Controllers;
 using tutorial_9.Data;
+using tutorial_9.Models;
 using tutorial_9.ResponseModels;
 
 namespace tutorial_9.Repositories;
@@ -44,4 +43,29 @@ public class TripRepository : ITripRepository
        
         return trips;
     }
+
+    public async Task<int> DeleteClient(CancellationToken cancellationToken, int id)
+    {
+        var client = await _context.Clients.FindAsync(id);
+        if (client != null)
+        {
+            _context.Clients.Remove(client);
+            var res =await _context.SaveChangesAsync(cancellationToken);
+            return res;
+        }
+
+        return -1;
+    }
+
+    public async Task<bool> DoesClientExist(int id)
+    {
+        var client = await _context.Clients.AnyAsync(c =>c.IdClient == id);
+        return client;
+    }
+    public async Task<bool> HasTrips(int id)
+    {
+        var hasTrips = await _context.ClientTrips.AnyAsync(cl => cl.IdClient == id);
+        return hasTrips;
+    }
+    
 }
