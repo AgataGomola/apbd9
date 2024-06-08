@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.JavaScript;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using tutorial_9.Data;
@@ -68,13 +69,13 @@ public class TripsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id:int}/clients")]
-    public async Task<IActionResult> attachClient(int id, [FromBody] ClientTrip cl)
+    [HttpPost("{idTrip:int}/clients")]
+    public async Task<IActionResult> attachClient(int idTrip, [FromBody] ClientAttach cl)
     {
-        var trip = await _context.Trips.FindAsync(id);
+        var trip = await _context.Trips.FindAsync(idTrip);
         if (trip == null)
         {
-            return NotFound($"Trip with id {id} does not exist.");
+            return NotFound($"Trip with id {idTrip} does not exist.");
         }
 
         if (trip.DateFrom < DateTime.Now)
@@ -82,11 +83,11 @@ public class TripsController : ControllerBase
             return BadRequest("Trip already started.");
         }
         
-        var client = await _context.Clients.SingleOrDefaultAsync(c => c.Pesel == cl.IdClientNavigation.Pesel);
+        var client = await _context.Clients.SingleOrDefaultAsync(c => c.Pesel == cl.Pesel);
         
         if (client != null)
         {
-            var isAssigned = await _context.ClientTrips.AnyAsync(t => t.IdClientNavigation.Pesel == cl.IdClientNavigation.Pesel && t.IdTrip == id);
+            var isAssigned = await _context.ClientTrips.AnyAsync(t => t.IdClientNavigation.Pesel == cl.Pesel && t.IdTrip == idTrip);
             if (isAssigned)
             {
                 return BadRequest("Client is already assigned to this trip");
@@ -95,11 +96,11 @@ public class TripsController : ControllerBase
         }
         client = new Client()
         {
-            FirstName = cl.IdClientNavigation.FirstName,
-            LastName = cl.IdClientNavigation.LastName,
-            Email = cl.IdClientNavigation.Email,
-            Telephone = cl.IdClientNavigation.Telephone,
-            Pesel = cl.IdClientNavigation.Pesel,
+            FirstName = cl.FirstName,
+            LastName = cl.LastName,
+            Email = cl.Email,
+            Telephone = cl.Telephone,
+            Pesel = cl.Pesel,
         };
         _context.Clients.Add(client);
         await _context.SaveChangesAsync();
@@ -107,7 +108,7 @@ public class TripsController : ControllerBase
         var clientTrip = new ClientTrip()
         {
            IdClient = client.IdClient,
-           IdTrip = id,
+           IdTrip = idTrip,
            RegisteredAt = DateTime.Now,
            PaymentDate = cl.PaymentDate,
            IdClientNavigation = client,
@@ -118,4 +119,18 @@ public class TripsController : ControllerBase
         return NoContent();
     }
     
+}
+
+public class ClientAttach
+{
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Telephone { get; set; } = null!;
+    public string Pesel { get; set; } = null!;
+    public int IdTrip { get; set; }
+    public string TripName { get; set; } = null!;
+    public DateTime? PaymentDate{ get; set; }
+    
+
 }
