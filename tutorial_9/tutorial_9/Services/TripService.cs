@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
 using tutorial_9.Models;
 using tutorial_9.Repositories;
+using tutorial_9.RequestModels;
 using tutorial_9.ResponseModels;
-using tutorial_9.Services;
 
-namespace tutorial_9.Controllers;
+namespace tutorial_9.Services;
 
 public class TripService: ITripService
 {
@@ -37,5 +36,50 @@ public class TripService: ITripService
         var hasTrips = await _repository.HasTrips(id);
         return hasTrips;
     }
-    
+    public async Task<bool> DoesPeselExist(string pesel)
+    {
+        var client = await _repository.DoesPeselExist(pesel);
+        return client;
+    }
+    public async Task<bool> HasAssignedTrip(int id, string pesel)
+    {
+        var client = await _repository.HasAssignedTrip(id, pesel);
+        return client;
+    }
+    public async Task<bool> DoesTripExist(int idTrip)
+    {
+        var trip = await _repository.DoesTripExist(idTrip);
+        return trip;
+    }
+
+    public async Task<bool> IsTripInFuture(int idTrip)
+    {
+        var trip = await _repository.IsTripInFuture(idTrip);
+        return trip;
+    }
+
+    public async Task AttachClient(int idTrip, ClientAttachDTO cl)
+    {
+        var client = new Client
+        {
+            FirstName = cl.FirstName,
+            LastName = cl.LastName,
+            Email = cl.Email,
+            Telephone = cl.Telephone,
+            Pesel = cl.Pesel,
+        };
+        await _repository.AddClient(client);
+        var trip = await _repository.GetTrip(idTrip);
+        
+        var clientTrip = new ClientTrip()
+        {
+            IdClient = client.IdClient,
+            IdTrip = idTrip,
+            RegisteredAt = DateTime.Now,
+            PaymentDate = cl.PaymentDate,
+            IdClientNavigation = client,
+            IdTripNavigation = trip
+        };
+        await _repository.AddClientTrip(clientTrip);
+    }
 }

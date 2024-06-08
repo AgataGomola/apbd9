@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using tutorial_9.Models;
 using tutorial_9.ResponseModels;
 
@@ -10,4 +9,12 @@ public interface ITripRepository
     public Task<int> DeleteClient(CancellationToken cancellationToken, int id);
     public Task<bool> DoesClientExist(int id);
     public Task<bool> HasTrips(int id);
+    public Task<bool> DoesPeselExist(string pesel);
+    public Task<bool> HasAssignedTrip(int id,string pesel);
+    public Task<bool> DoesTripExist(int idTrip);
+    public Task<bool> IsTripInFuture(int idTrip);
+    public Task AddClient(Client client);
+
+    public Task<Trip> GetTrip(int idTrip);
+    public Task AddClientTrip(ClientTrip clientTrip);
 }

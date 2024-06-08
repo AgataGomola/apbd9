@@ -67,5 +67,43 @@ public class TripRepository : ITripRepository
         var hasTrips = await _context.ClientTrips.AnyAsync(cl => cl.IdClient == id);
         return hasTrips;
     }
-    
+    public async Task<bool> DoesPeselExist(string pesel)
+    {
+        var client = await _context.Clients.AnyAsync(c => c.Pesel == pesel);
+        return client;
+    }
+
+    public async Task<bool> HasAssignedTrip(int id, string pesel)
+    {
+        var isAssigned = await _context.ClientTrips.AnyAsync(t => t.IdClientNavigation.Pesel == pesel && t.IdTrip == id);
+        return isAssigned;
+    }
+
+    public async Task<bool> DoesTripExist(int idTrip)
+    {
+        var trip = await _context.Trips.AnyAsync(t => t.IdTrip == idTrip);
+        return trip;
+    }
+    public async Task<bool> IsTripInFuture(int idTrip)
+    {
+        var dateTrip = await _context.Trips.Where(t => t.IdTrip == idTrip).Select(tr => tr.DateFrom).FirstAsync();
+        return dateTrip < DateTime.Now;
+    }
+
+    public async Task AddClient(Client client)
+    {
+        _context.Clients.Add(client);
+        await _context.SaveChangesAsync();
+    }
+
+    public Task<Trip> GetTrip(int idTrip)
+    {
+        return _context.Trips.Where(t => t.IdTrip == idTrip).FirstAsync();
+    }
+
+    public async Task AddClientTrip(ClientTrip clientTrip)
+    {
+        _context.ClientTrips.Add(clientTrip);
+        await _context.SaveChangesAsync();
+    }
 }
